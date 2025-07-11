@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 
 from ..operations import NFTMinter, TokenManager, ContractManager, BatchProcessor
-from ..utils import AmountUtils, SerializationUtils
+from ..utils import AmountUtils, SerializationUtils, EnvManager
 from .wallet_manager import WalletManager
 from .network_manager import NetworkManager
 
@@ -49,34 +49,61 @@ class ErgoClient:
         self,
         seed_phrase: Optional[str] = None,
         node_url: Optional[str] = None,
-        network: str = "mainnet",
-        api_key: Optional[str] = None
+        network: Optional[str] = None,
+        api_key: Optional[str] = None,
+        env_file: Optional[str] = None
     ):
         """
         Initialize the ErgoClient.
         
         Args:
-            seed_phrase: Wallet seed phrase for signing transactions
-            node_url: Ergo node URL (defaults to public nodes)
-            network: Network to use ("mainnet" or "testnet")
-            api_key: API key for node access (if required)
+            seed_phrase: Wallet seed phrase for signing transactions (overrides env)
+            node_url: Ergo node URL (overrides env, defaults to public nodes)
+            network: Network to use ("mainnet" or "testnet") (overrides env)
+            api_key: API key for node access (overrides env)
+            env_file: Path to .env file (defaults to .env in current directory)
             
         Examples:
-            >>> # Initialize with seed phrase
-            >>> client = ErgoClient(seed_phrase="abandon abandon abandon...")
+            >>> # Initialize with environment variables
+            >>> client = ErgoClient()
             >>> 
-            >>> # Initialize with custom node
+            >>> # Initialize with explicit parameters
             >>> client = ErgoClient(
             ...     seed_phrase="abandon abandon abandon...",
             ...     node_url="http://localhost:9053",
             ...     network="testnet"
             ... )
+            >>> 
+            >>> # Initialize with custom .env file
+            >>> client = ErgoClient(env_file="custom.env")
         """
         self.logger = logging.getLogger(__name__)
         
+        # Initialize environment manager
+        self.env_manager = EnvManager(env_file)
+        
+        # Get configuration from environment or parameters
+        config = self._get_config(seed_phrase, node_url, network, api_key)
+        
+        # Validate security
+        security = self.env_manager.validate_security()
+        if not security["secure"]:
+            for issue in security["issues"]:
+                self.logger.error(f"Security issue: {issue}")
+            if config["network"] == "mainnet":
+                raise ValueError("Security issues detected for mainnet operations")
+        
+        for warning in security["warnings"]:
+            self.logger.warning(f"Security warning: {warning}")
+        
         # Initialize managers
-        self.wallet_manager = WalletManager(seed_phrase)
-        self.network_manager = NetworkManager(node_url, network, api_key)
+        self.wallet_manager = WalletManager(config["seed_phrase"])
+        self.network_manager = NetworkManager(
+            config["node_url"], 
+            config["network"], 
+            config["api_key"],
+            config["timeout"]
+        )
         
         # Initialize operation handlers
         self.nft_minter = NFTMinter(self.wallet_manager, self.network_manager)
@@ -84,7 +111,35 @@ class ErgoClient:
         self.contract_manager = ContractManager(self.wallet_manager, self.network_manager)
         self.batch_processor = BatchProcessor(self.wallet_manager, self.network_manager)
         
-        self.logger.info(f"ErgoClient initialized for {network}")
+        self.logger.info(f"ErgoClient initialized for {config['network']}")
+    
+    def _get_config(
+        self, 
+        seed_phrase: Optional[str], 
+        node_url: Optional[str], 
+        network: Optional[str], 
+        api_key: Optional[str]
+    ) -> Dict[str, Any]:
+        """
+        Get configuration from parameters or environment.
+        
+        Args:
+            seed_phrase: Explicit seed phrase parameter
+            node_url: Explicit node URL parameter
+            network: Explicit network parameter
+            api_key: Explicit API key parameter
+            
+        Returns:
+            Dictionary containing final configuration
+        """
+        return {
+            "seed_phrase": seed_phrase or self.env_manager.get_seed_phrase(),
+            "node_url": node_url or self.env_manager.get_node_url(),
+            "network": network or self.env_manager.get_network(),
+            "api_key": api_key or self.env_manager.get_api_key(),
+            "timeout": self.env_manager.get_timeout(),
+            "demo_mode": self.env_manager.get_demo_mode(),
+        }
     
     # Wallet Operations
     def get_balance(self, address: Optional[str] = None) -> Dict[str, Any]:

@@ -23,6 +23,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from sigmapy import ErgoClient, ConfigParser
+from sigmapy.utils import EnvManager
 from pathlib import Path
 
 
@@ -32,12 +33,23 @@ def demo_simple_operations():
     print("=" * 50)
     print()
     
-    # Initialize client with seed phrase
+    # Initialize client using environment variables
     print("1. Initializing ErgoClient...")
-    client = ErgoClient(
-        seed_phrase="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
-        network="testnet"  # Use testnet for demo
-    )
+    
+    # Create environment manager to check configuration
+    env_manager = EnvManager()
+    
+    # Check if we have environment configuration
+    if env_manager.get_seed_phrase():
+        print("   📋 Using configuration from environment variables")
+        client = ErgoClient()  # Use env vars
+    else:
+        print("   ⚠️  No environment configuration found, using demo values")
+        print("   💡 Create a .env file with your seed phrase for real operations")
+        client = ErgoClient(
+            seed_phrase="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+            network="testnet"  # Use testnet for demo
+        )
     
     print(f"   ✅ Connected to {client.get_network_info()['network']}")
     print(f"   📍 Primary address: {client.get_addresses()[0]}")
@@ -92,11 +104,9 @@ def demo_config_driven_operations():
     print("=" * 50)
     print()
     
-    # Initialize client
-    client = ErgoClient(
-        seed_phrase="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
-        network="testnet"
-    )
+    # Initialize client using environment variables
+    print("Using environment configuration...")
+    client = ErgoClient()  # Will use .env file if available
     
     # Get example config directory
     config_dir = Path(__file__).parent / "configs"
@@ -159,11 +169,9 @@ def demo_batch_operations():
     print("=" * 50)
     print()
     
-    # Initialize client
-    client = ErgoClient(
-        seed_phrase="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
-        network="testnet"
-    )
+    # Initialize client using environment variables
+    print("Using environment configuration...")
+    client = ErgoClient()  # Will use .env file if available
     
     # Demo airdrop
     print("1. Token airdrop to multiple addresses...")
@@ -216,11 +224,9 @@ def demo_utility_functions():
     print("=" * 50)
     print()
     
-    # Initialize client
-    client = ErgoClient(
-        seed_phrase="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
-        network="testnet"
-    )
+    # Initialize client using environment variables
+    print("Using environment configuration...")
+    client = ErgoClient()  # Will use .env file if available
     
     # Demo conversions
     print("1. Amount conversions...")
@@ -265,6 +271,28 @@ def main():
     print("Ergo blockchain development accessible to beginners.")
     print()
     
+    # Check environment setup
+    env_manager = EnvManager()
+    print("🔍 Environment Setup Check:")
+    
+    if env_manager.env_file.exists():
+        print(f"   ✅ .env file found: {env_manager.env_file}")
+    else:
+        print(f"   ⚠️  .env file not found: {env_manager.env_file}")
+        print("   💡 Create a .env file for secure configuration")
+        print("   📄 See .env.example for template")
+    
+    # Security validation
+    security = env_manager.validate_security()
+    if security["secure"]:
+        print("   🔐 Security: All checks passed")
+    else:
+        print("   ⚠️  Security: Issues detected")
+        for issue in security["issues"]:
+            print(f"       - {issue}")
+    
+    print()
+    
     try:
         # Run all demo sections
         demo_simple_operations()
@@ -275,14 +303,16 @@ def main():
         print("🎉 Demo completed successfully!")
         print()
         print("📚 What you learned:")
-        print("• How to initialize ErgoClient with a seed phrase")
+        print("• How to initialize ErgoClient with environment variables")
         print("• How to mint NFTs with just one line of code")
         print("• How to create and distribute tokens easily")
         print("• How to use configuration files for batch operations")
         print("• How to perform airdrops and cost estimations")
         print("• How to use utility functions for common tasks")
+        print("• How to secure your seed phrase using .env files")
         print()
         print("🔧 Next steps:")
+        print("• Create a .env file with your seed phrase (see .env.example)")
         print("• Install ergo-lib-python to connect to real nodes")
         print("• Try modifying the configuration files")
         print("• Explore the tutorial modules for deeper learning")
@@ -292,6 +322,7 @@ def main():
         print(f"❌ Demo failed: {e}")
         print("💡 This is expected if ergo-lib-python is not installed.")
         print("   The demo shows how the APIs work conceptually.")
+        print("💡 Create a .env file for secure configuration.")
 
 
 if __name__ == "__main__":

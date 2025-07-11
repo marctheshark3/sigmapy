@@ -144,6 +144,16 @@ ENV/
 env.bak/
 venv.bak/
 
+# SigmaPy specific security files
+*.key
+*.pem
+private_keys/
+wallets/
+seed_phrases.txt
+temp_configs/
+test_outputs/
+blockchain_data/
+
 # Spyder project settings
 .spyderproject
 .spyproject

@@ -109,14 +109,31 @@ python -c "import sigmapy; print('SigmaPy installed successfully!')"
 
 ### Basic Usage
 
+#### Option 1: Using Environment Variables (Recommended)
+
+First, create a `.env` file:
+
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit with your values
+nano .env
+```
+
+In your `.env` file:
+```bash
+SIGMAPY_SEED_PHRASE="your twelve word mnemonic phrase goes here for wallet access"
+SIGMAPY_NETWORK="testnet"
+SIGMAPY_DEMO_MODE="false"
+```
+
+Then use SigmaPy:
 ```python
 from sigmapy import ErgoClient
 
-# Initialize client with seed phrase
-client = ErgoClient(
-    seed_phrase="your twelve word mnemonic phrase goes here for wallet access",
-    network="testnet"  # Use "mainnet" for production
-)
+# Initialize client - automatically uses .env file
+client = ErgoClient()
 
 # Check balance
 balance = client.get_balance()
@@ -127,6 +144,24 @@ addresses = client.get_addresses(3)
 print(f"Primary address: {addresses[0]}")
 ```
 
+#### Option 2: Explicit Parameters
+
+```python
+from sigmapy import ErgoClient
+
+# Initialize client with explicit parameters
+client = ErgoClient(
+    seed_phrase="your twelve word mnemonic phrase goes here for wallet access",
+    network="testnet"  # Use "mainnet" for production
+)
+
+# Check balance
+balance = client.get_balance()
+print(f"Balance: {balance['erg']} ERG")
+```
+
+**🔐 Security Note**: Always use environment variables for production. Never hardcode seed phrases!
+
 ### Connecting to Ergo Nodes
 
 #### Using Public Nodes (Default)
@@ -134,11 +169,12 @@ print(f"Primary address: {addresses[0]}")
 SigmaPy automatically connects to public nodes:
 
 ```python
-# Mainnet (default)
-client = ErgoClient(seed_phrase="your seed phrase")
+# Using .env file (recommended)
+client = ErgoClient()  # Uses SIGMAPY_NETWORK from .env
 
-# Testnet
-client = ErgoClient(seed_phrase="your seed phrase", network="testnet")
+# Or with explicit parameters
+client = ErgoClient(network="testnet")  # Testnet
+client = ErgoClient(network="mainnet")  # Mainnet
 ```
 
 #### Using Local Node
@@ -151,9 +187,12 @@ java -jar ergo-5.0.14.jar --mainnet -c ergo.conf
 ```
 
 ```python
-# Connect to local node
+# Option 1: Using .env file
+# Add to .env: SIGMAPY_NODE_URL="http://localhost:9053"
+client = ErgoClient()
+
+# Option 2: Explicit parameter
 client = ErgoClient(
-    seed_phrase="your seed phrase",
     node_url="http://localhost:9053",  # Default local node URL
     network="mainnet"
 )
@@ -162,9 +201,14 @@ client = ErgoClient(
 #### Using Custom Node with API Key
 
 ```python
-# Connect to custom node with API key
+# Option 1: Using .env file (recommended)
+# Add to .env:
+# SIGMAPY_NODE_URL="https://your-custom-node.com"
+# SIGMAPY_API_KEY="your-api-key"
+client = ErgoClient()
+
+# Option 2: Explicit parameters
 client = ErgoClient(
-    seed_phrase="your seed phrase",
     node_url="https://your-custom-node.com",
     api_key="your-api-key",
     network="mainnet"
@@ -176,19 +220,21 @@ client = ErgoClient(
 #### Mainnet Configuration
 
 ```python
-client = ErgoClient(
-    seed_phrase="your seed phrase",
-    network="mainnet"
-)
+# Using .env file: SIGMAPY_NETWORK="mainnet"
+client = ErgoClient()
+
+# Or explicit parameter
+client = ErgoClient(network="mainnet")
 ```
 
 #### Testnet Configuration
 
 ```python
-client = ErgoClient(
-    seed_phrase="your seed phrase",
-    network="testnet"
-)
+# Using .env file: SIGMAPY_NETWORK="testnet"
+client = ErgoClient()
+
+# Or explicit parameter
+client = ErgoClient(network="testnet")
 ```
 
 ## 🎨 Examples
@@ -198,8 +244,8 @@ client = ErgoClient(
 ```python
 from sigmapy import ErgoClient
 
-# Initialize client
-client = ErgoClient(seed_phrase="your seed phrase", network="testnet")
+# Initialize client using .env file
+client = ErgoClient()
 
 # Mint an NFT
 nft_id = client.mint_nft(
@@ -221,7 +267,8 @@ print(f"NFT minted! Token ID: {nft_id}")
 ```python
 from sigmapy import ErgoClient
 
-client = ErgoClient(seed_phrase="your seed phrase", network="testnet")
+# Initialize client using .env file
+client = ErgoClient()
 
 # Create a token
 token_id = client.create_token(
@@ -449,12 +496,20 @@ export SIGMAPY_API_KEY=your_api_key
 
 - **Never share your seed phrase** with anyone
 - **Never commit seed phrases** to version control
-- **Use environment variables** for production:
+- **Use .env files** for secure configuration:
+
+```bash
+# Create .env file
+echo 'SIGMAPY_SEED_PHRASE="your twelve word seed phrase"' > .env
+
+# Add .env to .gitignore
+echo '.env' >> .gitignore
+```
 
 ```python
-import os
-seed_phrase = os.getenv("WALLET_SEED_PHRASE")
-client = ErgoClient(seed_phrase=seed_phrase)
+# SigmaPy automatically loads from .env file
+from sigmapy import ErgoClient
+client = ErgoClient()  # Secure - no hardcoded secrets!
 ```
 
 ### Network Security

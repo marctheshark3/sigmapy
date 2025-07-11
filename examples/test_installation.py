@@ -130,8 +130,13 @@ def test_basic_functionality():
     
     try:
         from sigmapy import ErgoClient
+        from sigmapy.utils import EnvManager
         
-        # Test client initialization (demo mode)
+        # Test environment manager
+        env_manager = EnvManager()
+        print("   ✅ Environment manager initialized")
+        
+        # Test client initialization (using environment or demo mode)
         client = ErgoClient(
             seed_phrase="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
             network="testnet"
@@ -150,6 +155,10 @@ def test_basic_functionality():
         # Test balance check (demo mode)
         balance = client.get_balance()
         print(f"   ✅ Balance check: {balance['erg']} ERG (demo mode)")
+        
+        # Test environment configuration
+        config = env_manager.get_config_dict()
+        print(f"   ✅ Environment config loaded: {len(config)} settings")
         
         return True
         
