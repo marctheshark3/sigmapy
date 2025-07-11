@@ -1,0 +1,23 @@
+# Core dependencies
+requests>=2.25.0
+typing-extensions>=4.0.0
+PyYAML>=6.0
+
+# Development dependencies
+pytest>=6.0
+black>=22.0
+flake8>=4.0
+mypy>=0.910
+
+# Optional dependencies for enhanced functionality
+# Note: ergo-lib-python is required for actual blockchain operations
+# Install with: pip install ergo-lib-python
+# ergo-lib-python>=0.9.0
+
+# Documentation dependencies
+sphinx>=4.0
+sphinx-rtd-theme>=1.0
+
+# Example dependencies
+ipython>=7.0  # For interactive examples
+jupyter>=1.0  # For notebook examples

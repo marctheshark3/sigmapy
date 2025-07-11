@@ -17,32 +17,47 @@ SigmaPy is a comprehensive learning resource for developers who want to build on
 
 ### Prerequisites
 
-You'll need Python 3.8+ and the official Ergo Python library:
+You'll need Python 3.8+ and the official Ergo Python library. For complete installation instructions, see [INSTALLATION.md](INSTALLATION.md).
 
-```bash
-pip install ergo-lib-python
-```
-
-### Installation
-
-Clone and install SigmaPy:
+**Quick Demo (No blockchain connection required):**
 
 ```bash
 git clone https://github.com/ergoplatform/sigmapy.git
 cd sigmapy
 pip install -e .
+python examples/beginner_friendly_demo.py
+```
+
+**Full Installation with Blockchain Support:**
+
+```bash
+# Install ergo-lib-python
+pip install ergo-lib-python
+
+# Or build from source for latest features
+git clone https://github.com/ergoplatform/sigma-rust.git
+cd sigma-rust/bindings/ergo-lib-python
+pip install maturin
+maturin develop --release
 ```
 
 ### Your First Transaction
 
 ```python
-from sigmapy.examples import SimplePaymentExample
+from sigmapy import ErgoClient
 
-# Create a payment example
-example = SimplePaymentExample()
+# Initialize client with seed phrase
+client = ErgoClient(seed_phrase="your seed phrase here")
 
-# Run the complete tutorial
-example.run_complete_example()
+# Send ERG in one line
+tx_id = client.send_erg(recipient="9f...", amount_erg=1.5)
+
+# Mint an NFT in one line
+nft_id = client.mint_nft(
+    name="My First NFT",
+    description="A unique digital asset",
+    image_url="https://example.com/image.png"
+)
 ```
 
 ## 📚 Tutorials
@@ -94,6 +109,100 @@ tutorial.run_complete_tutorial()
 - Token transfers
 - NFT operations
 - Token metadata
+
+## 🚀 High-Level APIs
+
+SigmaPy provides beginner-friendly, high-level APIs that make complex operations simple:
+
+### ErgoClient - Your Main Interface
+
+```python
+from sigmapy import ErgoClient
+
+# Initialize with seed phrase
+client = ErgoClient(seed_phrase="your seed phrase here")
+
+# Or with custom node
+client = ErgoClient(
+    seed_phrase="your seed phrase here",
+    node_url="http://localhost:9053",
+    network="testnet"
+)
+```
+
+### NFT Operations
+
+```python
+# Mint a single NFT
+nft_id = client.mint_nft(
+    name="My Artwork",
+    description="A unique piece of digital art",
+    image_url="https://example.com/art.png",
+    traits={"rarity": "legendary", "color": "gold"}
+)
+
+# Mint entire collection from config
+nft_ids = client.mint_nft_collection("collection_config.yaml")
+```
+
+### Token Operations
+
+```python
+# Create a token
+token_id = client.create_token(
+    name="My Token",
+    description="A utility token",
+    supply=1000000,
+    decimals=2
+)
+
+# Distribute to multiple addresses
+tx_ids = client.distribute_tokens(
+    token_id="abc123...",
+    config_file="distribution.yaml"
+)
+
+# Airdrop to addresses
+tx_ids = client.airdrop_tokens(
+    token_id="abc123...",
+    addresses=["9f...", "9g...", "9h..."],
+    amounts=[100, 200, 300]
+)
+```
+
+### Configuration-Driven Operations
+
+Create YAML config files for batch operations:
+
+```yaml
+# nft_collection.yaml
+collection:
+  name: "My Art Collection"
+  description: "Digital artwork collection"
+  
+nfts:
+  - name: "Art #1"
+    description: "First artwork"
+    image: "https://example.com/art1.png"
+    traits:
+      background: "blue"
+      rarity: "common"
+  # ... more NFTs
+```
+
+```yaml
+# token_distribution.yaml
+distribution:
+  batch_size: 50
+  fee_per_tx: 0.001
+  
+recipients:
+  - address: "9f..."
+    amount: 100
+  - address: "9g..."
+    amount: 200
+  # ... more recipients
+```
 
 ## 🔧 Examples
 
@@ -187,11 +296,34 @@ sigmapy/
 
 ## 📖 Learning Path
 
-1. **Start with Basic Wallet Tutorial** - Learn wallet fundamentals
-2. **Try Simple Payment Example** - Send your first transaction
-3. **Explore Token Operations** - Work with native tokens
-4. **Advanced Examples** - Multi-sig, smart contracts, NFTs
-5. **Build Your Own** - Use utilities to create custom applications
+### For Complete Beginners
+
+1. **Start with the Demo** - Run `python examples/beginner_friendly_demo.py`
+2. **Follow Installation Guide** - See [INSTALLATION.md](INSTALLATION.md) for full setup
+3. **Try High-Level APIs** - Use `ErgoClient` for simple operations
+4. **Explore Config Files** - Use YAML files for batch operations
+
+### For Developers
+
+1. **Basic Wallet Tutorial** - Learn wallet fundamentals
+2. **Simple Payment Example** - Send your first transaction
+3. **Advanced Transactions** - Multi-output with registers and extensions
+4. **Token Operations** - Create and distribute tokens
+5. **NFT Collections** - Mint entire collections from config files
+6. **Build Your Own** - Use utilities to create custom applications
+
+### Example Commands
+
+```bash
+# Run the beginner demo
+python examples/beginner_friendly_demo.py
+
+# Run advanced transaction example
+python examples/advanced_transaction.py
+
+# Try the basic wallet tutorial
+python -c "from sigmapy.tutorials import BasicWalletTutorial; BasicWalletTutorial().run_complete_tutorial()"
+```
 
 ## 🤝 Contributing
 

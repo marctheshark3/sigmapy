@@ -1,0 +1,65 @@
+# NFT Collection Configuration Example
+# This file demonstrates how to configure a complete NFT collection
+# for batch minting using SigmaPy
+
+collection:
+  name: "Demo Art Collection"
+  description: "A demonstration collection of unique digital artworks"
+  creator: "Demo Artist"
+  royalty: 0.05  # 5% royalty
+  
+nfts:
+  - name: "Digital Sunrise #1"
+    description: "A breathtaking digital sunrise over mountains"
+    image: "https://example.com/images/sunrise1.png"
+    traits:
+      background: "mountains"
+      time: "sunrise"
+      rarity: "common"
+      color_scheme: "warm"
+      
+  - name: "Digital Sunrise #2"
+    description: "A serene digital sunrise over the ocean"
+    image: "https://example.com/images/sunrise2.png"
+    traits:
+      background: "ocean"
+      time: "sunrise"
+      rarity: "uncommon"
+      color_scheme: "cool"
+      
+  - name: "Digital Sunset #1"
+    description: "A vibrant digital sunset in the desert"
+    image: "https://example.com/images/sunset1.png"
+    traits:
+      background: "desert"
+      time: "sunset"
+      rarity: "rare"
+      color_scheme: "warm"
+      special_effects: "lens_flare"
+      
+  - name: "Digital Midnight #1"
+    description: "A mysterious digital midnight scene in the forest"
+    image: "https://example.com/images/midnight1.png"
+    traits:
+      background: "forest"
+      time: "midnight"
+      rarity: "legendary"
+      color_scheme: "dark"
+      special_effects: "moonlight"
+      
+  - name: "Digital Dawn #1"
+    description: "A peaceful digital dawn in the countryside"
+    image: "https://example.com/images/dawn1.png"
+    traits:
+      background: "countryside"
+      time: "dawn"
+      rarity: "common"
+      color_scheme: "soft"
+      
+# Additional metadata (optional)
+metadata:
+  website: "https://example.com"
+  social:
+    twitter: "@demoartist"
+    discord: "https://discord.gg/demoart"
+  license: "CC BY-SA 4.0"

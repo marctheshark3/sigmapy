@@ -1,0 +1,86 @@
+# Token Distribution Configuration Example
+# This file demonstrates how to configure token distribution
+# to multiple recipients using SigmaPy
+
+distribution:
+  token_id: "your_token_id_here"  # Replace with actual token ID
+  batch_size: 50  # Number of recipients per transaction
+  fee_per_tx: 0.001  # Fee in ERG per transaction
+  
+recipients:
+  # Community members
+  - address: "9fRusAarL1KkrWQVsxSRVYnvWzD4dWoLLxbYk3eWBV3jD3qvr3W"
+    amount: 100
+    note: "Community leader"
+    
+  - address: "9gQqZyxyjAptMbfW1Gydm3qaap11zd6X9DrABTbMBRJLjZhQRCA"
+    amount: 150
+    note: "Developer contributor"
+    
+  - address: "9h8UVJjdUYbNLuSqzZCqKNs2mxjVGYB9JwP4vVtNqmR3sKdxYyZ"
+    amount: 75
+    note: "Marketing partner"
+    
+  # Beta testers
+  - address: "9iTester1234567890123456789012345678901234567890"
+    amount: 50
+    note: "Beta tester #1"
+    
+  - address: "9jTester1234567890123456789012345678901234567890"
+    amount: 50
+    note: "Beta tester #2"
+    
+  # Early supporters
+  - address: "9kSupporter1234567890123456789012345678901234567890"
+    amount: 200
+    note: "Early supporter - tier 1"
+    
+  - address: "9lSupporter1234567890123456789012345678901234567890"
+    amount: 150
+    note: "Early supporter - tier 2"
+    
+  - address: "9mSupporter1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Early supporter - tier 3"
+    
+  # Contest winners
+  - address: "9nWinner1234567890123456789012345678901234567890"
+    amount: 300
+    note: "Contest winner - 1st place"
+    
+  - address: "9oWinner1234567890123456789012345678901234567890"
+    amount: 200
+    note: "Contest winner - 2nd place"
+    
+  - address: "9pWinner1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Contest winner - 3rd place"
+    
+  # Additional recipients (expand as needed)
+  - address: "9qRecipient1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member"
+    
+  - address: "9rRecipient1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member"
+    
+  - address: "9sRecipient1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member"
+    
+  - address: "9tRecipient1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member"
+    
+  - address: "9uRecipient1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member"
+
+# Distribution summary
+summary:
+  total_recipients: 15
+  total_tokens: 1650
+  estimated_transactions: 1  # Based on batch_size
+  estimated_total_fees: 0.001  # In ERG
+  estimated_min_box_values: 0.015  # 15 recipients * 0.001 ERG each
