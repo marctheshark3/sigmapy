@@ -1,0 +1,201 @@
+# Large Token Distribution Test Config
+# Testing 20+ tokens to 50+ addresses use case
+# All recipients processed in single transaction
+
+distribution:
+  token_id: "1fd6e032e8476c4aa54c18c1a308dce83940e8f4a28f576440513ed7326ad489"  # Example token ID
+  fee_per_tx: 0.001  # Fee in ERG per transaction
+
+recipients:
+  # Community Leaders
+  - address: "9fRusAarL1KkrWQVsxSRVYnvWzD4dWoLLxbYk3eWBV3jD3qvr3W"
+    amount: 500
+    note: "Community leader #1"
+  - address: "9gQqZyxyjAptMbfW1Gydm3qaap11zd6X9DrABTbMBRJLjZhQRCA"
+    amount: 450
+    note: "Community leader #2"
+  - address: "9h8UVJjdUYbNLuSqzZCqKNs2mxjVGYB9JwP4vVtNqmR3sKdxYyZ"
+    amount: 400
+    note: "Community leader #3"
+  - address: "9iLeader1234567890123456789012345678901234567890"
+    amount: 350
+    note: "Community leader #4"
+  - address: "9jLeader1234567890123456789012345678901234567890"
+    amount: 300
+    note: "Community leader #5"
+  - address: "9kLeader1234567890123456789012345678901234567890"
+    amount: 250
+    note: "Community leader #6"
+  - address: "9lLeader1234567890123456789012345678901234567890"
+    amount: 200
+    note: "Community leader #7"
+  - address: "9mLeader1234567890123456789012345678901234567890"
+    amount: 180
+    note: "Community leader #8"
+  - address: "9nLeader1234567890123456789012345678901234567890"
+    amount: 160
+    note: "Community leader #9"
+  - address: "9oLeader1234567890123456789012345678901234567890"
+    amount: 140
+    note: "Community leader #10"
+  - address: "9pLeader1234567890123456789012345678901234567890"
+    amount: 120
+    note: "Community leader #11"
+  - address: "9qLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #12"
+  - address: "9rLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #13"
+  - address: "9sLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #14"
+  - address: "9tLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #15"
+  - address: "9uLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #16"
+  - address: "9vLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #17"
+  - address: "9wLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #18"
+  - address: "9xLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #19"
+  - address: "9yLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #20"
+  - address: "9zLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #21"
+  - address: "9ALeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #22"
+  - address: "9BLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #23"
+  - address: "9CLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #24"
+  - address: "9DLeader1234567890123456789012345678901234567890"
+    amount: 100
+    note: "Community leader #25"
+
+  # Batch 2 - Contributors (25 recipients)
+  - address: "9EContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #1"
+  - address: "9FContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #2"
+  - address: "9GContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #3"
+  - address: "9HContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #4"
+  - address: "9IContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #5"
+  - address: "9JContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #6"
+  - address: "9KContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #7"
+  - address: "9LContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #8"
+  - address: "9MContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #9"
+  - address: "9NContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #10"
+  - address: "9OContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #11"
+  - address: "9PContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #12"
+  - address: "9QContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #13"
+  - address: "9RContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #14"
+  - address: "9SContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #15"
+  - address: "9TContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #16"
+  - address: "9UContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #17"
+  - address: "9VContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #18"
+  - address: "9WContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #19"
+  - address: "9XContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #20"
+  - address: "9YContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #21"
+  - address: "9ZContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #22"
+  - address: "9aContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #23"
+  - address: "9bContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #24"
+  - address: "9cContrb1234567890123456789012345678901234567890"
+    amount: 75
+    note: "Developer contributor #25"
+
+  # Batch 3 - Community Members (10 recipients to reach 60 total)
+  - address: "9dMember1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member #1"
+  - address: "9eMember1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member #2"
+  - address: "9fMember1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member #3"
+  - address: "9gMember1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member #4"
+  - address: "9hMember1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member #5"
+  - address: "9iMember1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member #6"
+  - address: "9jMember1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member #7"
+  - address: "9kMember1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member #8"
+  - address: "9lMember1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member #9"
+  - address: "9mMember1234567890123456789012345678901234567890"
+    amount: 25
+    note: "Community member #10"
+
+# Summary
+# Total recipients: 60
+# Total tokens: 8400 (leaders: 4250, contributors: 1875, members: 250) 
+# Estimated batches: 3 (25 recipients each for first 2 batches, 10 for last)
+# Estimated fees: 0.003 ERG (3 transactions * 0.001 ERG)
+# Min box values: 0.060 ERG (60 recipients * 0.001 ERG)

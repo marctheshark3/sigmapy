@@ -1,0 +1,11 @@
+distribution:
+  batch_size: 50
+  fee_per_tx: 0.001
+  token_id: your_token_id_here
+recipients:
+- address: 9fRusAarL1KkrWQVsxSRVYnvWzD4dWoLLxbYk3eWBV3jD3qvr3W
+  amount: 100
+  note: Community member
+- address: 9gQqZyxyjAptMbfW1Gydm3qaap11zd6X9DrABTbMBRJLjZhQRCA
+  amount: 150
+  note: Developer contributor

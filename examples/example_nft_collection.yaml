@@ -1,0 +1,52 @@
+collection:
+  base_metadata:
+    description: A unique digital art collection
+    royalties:
+    - address: 9fArtistAddressHere...
+      percentage: 85
+    - address: 9fCharityAddressHere...
+      percentage: 15
+  token_id: your_collection_token_id_here
+nfts:
+- additional_metadata:
+    explicit: false
+    tags:
+    - art
+    - digital
+    - collectible
+  description: First artwork in collection
+  image_url: https://example.com/art1.png
+  name: 'Art #1'
+  traits:
+    levels:
+      complexity:
+        max: 10
+        value: 7
+      rarity:
+        max: 100
+        value: 85
+    properties:
+      artist: Jane Doe
+      background: blue
+      style: abstract
+    stats:
+      creation_year: 2024
+      edition: 1
+- description: Second artwork in collection
+  image_url: https://example.com/art2.png
+  name: 'Art #2'
+  traits:
+    levels:
+      complexity:
+        max: 10
+        value: 5
+      rarity:
+        max: 100
+        value: 92
+    properties:
+      artist: Jane Doe
+      background: red
+      style: minimalist
+    stats:
+      creation_year: 2024
+      edition: 2

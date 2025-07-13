@@ -1,0 +1,165 @@
+# NFT Collection Minting Configuration
+# Use this after creating a collection token to mint NFTs that belong to the collection
+
+collection:
+  # Collection token ID obtained from collection creation
+  token_id: "your_collection_token_id_here"
+  
+  # Base metadata shared by all NFTs in collection
+  base_metadata:
+    description: "Part of the Digital Art Masters Collection"
+    
+    # Collection-level royalties (can be overridden per NFT)
+    royalties:
+      - address: "9fArtistAddressHere..."
+        percentage: 80
+        name: "Artist"
+      - address: "9fCharityAddressHere..."
+        percentage: 15
+        name: "Charity"
+      - address: "9fPlatformAddressHere..."
+        percentage: 5
+        name: "Platform"
+
+# Individual NFTs in the collection
+nfts:
+  - name: "Neon Dreams #1"
+    description: "A vibrant exploration of neon aesthetics in digital space"
+    image_url: "https://ipfs.io/ipfs/QmExample1"
+    traits:
+      properties:
+        background: "neon_blue"
+        style: "cyberpunk"
+        artist: "Alice Chen"
+        medium: "digital_painting"
+      levels:
+        rarity:
+          value: 85
+          max: 100
+        complexity:
+          value: 9
+          max: 10
+        vibrance:
+          value: 95
+          max: 100
+      stats:
+        creation_year: 2024
+        edition: 1
+        hours_created: 32
+    additional_metadata:
+      explicit: false
+      tags: ["cyberpunk", "neon", "futuristic", "digital"]
+      inspiration: "Blade Runner aesthetic"
+
+  - name: "Organic Synthesis #2"
+    description: "Nature meets technology in this organic digital composition"
+    image_url: "https://ipfs.io/ipfs/QmExample2"
+    traits:
+      properties:
+        background: "forest_green"
+        style: "bio_tech"
+        artist: "Bob Martinez"
+        medium: "3d_render"
+      levels:
+        rarity:
+          value: 92
+          max: 100
+        complexity:
+          value: 8
+          max: 10
+        harmony:
+          value: 88
+          max: 100
+      stats:
+        creation_year: 2024
+        edition: 2
+        hours_created: 45
+    additional_metadata:
+      explicit: false
+      tags: ["nature", "technology", "synthesis", "organic"]
+      inspiration: "Biomimetic design"
+
+  - name: "Abstract Geometry #3"
+    description: "Pure mathematical beauty expressed through abstract geometric forms"
+    image_url: "https://ipfs.io/ipfs/QmExample3"
+    traits:
+      properties:
+        background: "minimal_white"
+        style: "geometric_abstract"
+        artist: "Carol Zhang"
+        medium: "vector_art"
+      levels:
+        rarity:
+          value: 78
+          max: 100
+        complexity:
+          value: 6
+          max: 10
+        precision:
+          value: 99
+          max: 100
+      stats:
+        creation_year: 2024
+        edition: 3
+        hours_created: 18
+    additional_metadata:
+      explicit: false
+      tags: ["geometry", "abstract", "mathematics", "minimal"]
+      inspiration: "Bauhaus movement"
+
+  - name: "Ethereal Landscape #4"
+    description: "Dreamlike landscapes that exist only in the digital realm"
+    image_url: "https://ipfs.io/ipfs/QmExample4"
+    traits:
+      properties:
+        background: "ethereal_purple"
+        style: "surreal_landscape"
+        artist: "David Kim"
+        medium: "digital_composite"
+      levels:
+        rarity:
+          value: 88
+          max: 100
+        complexity:
+          value: 10
+          max: 10
+        mystique:
+          value: 94
+          max: 100
+      stats:
+        creation_year: 2024
+        edition: 4
+        hours_created: 56
+    additional_metadata:
+      explicit: false
+      tags: ["landscape", "surreal", "ethereal", "dreamscape"]
+      inspiration: "Salvador Dali meets digital art"
+
+  - name: "Data Visualization #5"
+    description: "Beautiful patterns emerge from complex data structures"
+    image_url: "https://ipfs.io/ipfs/QmExample5"
+    traits:
+      properties:
+        background: "data_black"
+        style: "info_visualization"
+        artist: "Eva Rodriguez"
+        medium: "algorithmic_art"
+      levels:
+        rarity:
+          value: 95
+          max: 100
+        complexity:
+          value: 10
+          max: 10
+        innovation:
+          value: 97
+          max: 100
+      stats:
+        creation_year: 2024
+        edition: 5
+        hours_created: 72
+        data_points: 1000000
+    additional_metadata:
+      explicit: false
+      tags: ["data", "visualization", "algorithmic", "patterns"]
+      inspiration: "Information as art"

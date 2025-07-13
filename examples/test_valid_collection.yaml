@@ -1,0 +1,14 @@
+collection:
+  name: "Test Art Collection"
+  description: "A test collection for demonstration purposes"
+  supply: 1000
+  royalties:
+    - address: "9fRusAarL1KkrWQVsxSRVYnvWzD4dWoLLxbYk3eWBV3jD3qvr3W"
+      percentage: 85
+      name: "Artist"
+    - address: "9gQqZyxyjAptMbfW1Gydm3qaap11zd6X9DrABTbMBRJLjZhQRCA"
+      percentage: 15
+      name: "Platform"
+  additional_metadata:
+    website: "https://testcollection.art"
+    category: "digital_art"

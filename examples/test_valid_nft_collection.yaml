@@ -1,0 +1,43 @@
+collection:
+  token_id: "1fd6e032e8476c4aa54c18c1a308dce83940e8f4a28f576440513ed7326ad489"
+  base_metadata:
+    description: "Part of the Test Art Collection"
+    royalties:
+      - address: "9fRusAarL1KkrWQVsxSRVYnvWzD4dWoLLxbYk3eWBV3jD3qvr3W"
+        percentage: 80
+        name: "Artist"
+      - address: "9gQqZyxyjAptMbfW1Gydm3qaap11zd6X9DrABTbMBRJLjZhQRCA"
+        percentage: 20
+        name: "Platform"
+
+nfts:
+  - name: "Test Art #1"
+    description: "First test artwork"
+    image_url: "https://example.com/art1.png"
+    traits:
+      properties:
+        background: "blue"
+        style: "abstract"
+      levels:
+        rarity:
+          value: 75
+          max: 100
+      stats:
+        creation_year: 2024
+    additional_metadata:
+      explicit: false
+      tags: ["test", "art", "digital"]
+
+  - name: "Test Art #2"
+    description: "Second test artwork"
+    image_url: "https://example.com/art2.png"
+    traits:
+      properties:
+        background: "red"
+        style: "geometric"
+      levels:
+        rarity:
+          value: 90
+          max: 100
+      stats:
+        creation_year: 2024

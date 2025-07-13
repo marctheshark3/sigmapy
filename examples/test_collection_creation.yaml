@@ -1,0 +1,34 @@
+# Collection Token Creation Configuration
+# This creates a collection token that will serve as the parent for all NFTs
+
+collection:
+  name: "Digital Art Masters Collection"
+  description: "A curated collection of digital artwork from emerging artists"
+  supply: 10000  # Fungible collection token supply (should be > number of NFTs)
+  
+  # Multi-recipient royalty structure
+  royalties:
+    - address: "9fArtistAddressHere..."
+      percentage: 75
+      name: "Artist Collective"
+      description: "Primary creators of the artwork"
+    
+    - address: "9fCharityAddressHere..."
+      percentage: 20
+      name: "Digital Arts Foundation"
+      description: "Supporting digital art education"
+    
+    - address: "9fPlatformAddressHere..."
+      percentage: 5
+      name: "Platform Fee"
+      description: "Platform maintenance and development"
+  
+  # Additional collection metadata
+  additional_metadata:
+    website: "https://digitalmasters.art"
+    twitter: "@digitalmasters"
+    discord: "https://discord.gg/digitalmasters"
+    category: "digital_art"
+    theme: "contemporary"
+    artist_count: 12
+    launch_year: 2024

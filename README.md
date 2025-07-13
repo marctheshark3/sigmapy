@@ -1,349 +1,331 @@
-# SigmaPy - Ergo Blockchain Python Tutorials & Examples
+# SigmaPy - Production-Ready Ergo Blockchain Python Toolkit
 
-**Learn Ergo blockchain development with practical Python examples and step-by-step tutorials.**
+**Build robust Ergo blockchain applications with production-ready Python tooling.**
 
-SigmaPy is a comprehensive learning resource for developers who want to build on the Ergo blockchain using Python. It provides beginner-friendly tutorials, practical examples, and utility functions that make it easy to understand and implement Ergo blockchain concepts.
+SigmaPy is a comprehensive Python toolkit for the Ergo blockchain, designed for developers who need reliable, production-ready tools for token distribution, NFT operations, smart contracts, and blockchain automation. It provides both high-level APIs and CLI tools for seamless integration into your applications.
 
-## 🎯 What You'll Learn
+## 🎯 Key Features
 
-- **Basic Wallet Operations** - Create, restore, and manage Ergo wallets
-- **Transaction Handling** - Send payments, create complex transactions
-- **Token Operations** - Work with native tokens and NFTs
-- **Smart Contracts** - Interact with ErgoScript contracts
-- **Multi-signature Wallets** - Implement collaborative spending
-- **Best Practices** - Security, error handling, and optimization
+- **Production Token Distribution** - Distribute tokens to 60+ recipients in single transactions
+- **Node-Agnostic Decimal Support** - Automatic token metadata fetching and decimal handling
+- **Dry-Run Validation** - Test transactions before execution
+- **CLI Tools** - Ready-to-use command-line interfaces
+- **Modular Architecture** - Use standalone tools or integrate into existing applications
+- **Real Blockchain Integration** - Built on ergo-lib-python for production use
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-You'll need Python 3.8+ and the official Ergo Python library. For complete installation instructions, see [INSTALLATION.md](INSTALLATION.md).
+- Python 3.8+
+- Ergo node access (mainnet or testnet)
+- Optional: ergo-lib-python for real transactions
 
-**Quick Demo (No blockchain connection required):**
+### Installation
 
 ```bash
 git clone https://github.com/ergoplatform/sigmapy.git
 cd sigmapy
 pip install -e .
-python examples/beginner_friendly_demo.py
+
+# For production use with real transactions
+pip install ergo-lib-python
 ```
 
-**Full Installation with Blockchain Support:**
+### Your First Token Distribution
 
 ```bash
-# Install ergo-lib-python
-pip install ergo-lib-python
+# Create a distribution template
+python examples/cli_token_distribution.py template my_distribution.yaml
 
-# Or build from source for latest features
-git clone https://github.com/ergoplatform/sigma-rust.git
-cd sigma-rust/bindings/ergo-lib-python
-pip install maturin
-maturin develop --release
+# Edit the template with your token ID and recipients
+# Then validate the configuration
+python examples/cli_token_distribution.py validate my_distribution.yaml
+
+# Test with dry-run
+python examples/cli_token_distribution.py distribute my_distribution.yaml --dry-run
+
+# Execute live (with confirmation)
+python examples/cli_token_distribution.py distribute my_distribution.yaml --live
 ```
 
-### Your First Transaction
+## 📊 Token Distribution System
+
+### Single Transaction Processing
+
+SigmaPy processes all recipients in a single transaction, eliminating the need for batching:
+
+- ✅ **60+ recipients in one transaction**
+- ✅ **Automatic cost calculation** (0.001 ERG per recipient + single transaction fee)
+- ✅ **Production-ready validation**
+- ✅ **Comprehensive error handling**
+
+### Configuration Example
+
+```yaml
+# token_distribution.yaml
+distribution:
+  token_id: "1fd6e032e8476c4aa54c18c1a308dce83940e8f4a28f576440513ed7326ad489"
+  fee_per_tx: 0.001
+
+recipients:
+  - address: "9fRusAarL1KkrWQVsxSRVYnvWzD4dWoLLxbYk3eWBV3jD3qvr3W"
+    amount: 100.50    # Fractional amounts supported
+    note: "Community leader"
+  - address: "9gQqZyxyjAptMbfW1Gydm3qaap11zd6X9DrABTbMBRJLjZhQRCA"
+    amount: 250
+    note: "Developer contributor"
+  # ... up to 60+ recipients
+```
+
+### Validation Results
+
+```bash
+✅ Configuration is valid!
+📊 Summary:
+   • Recipients: 60
+   • Total tokens: 6,575
+   • Single transaction: ✅
+   • Min ERG needed: 0.060000 ERG
+   • Transaction fee: 0.001000 ERG
+   • Total cost: 0.061000 ERG
+```
+
+## 🔧 Node-Agnostic Decimal Support
+
+SigmaPy automatically fetches token metadata from Ergo nodes to handle decimals correctly:
 
 ```python
 from sigmapy import ErgoClient
 
-# Initialize client with seed phrase
-client = ErgoClient(seed_phrase="your seed phrase here")
+client = ErgoClient()
 
-# Send ERG in one line
-tx_id = client.send_erg(recipient="9f...", amount_erg=1.5)
-
-# Mint an NFT in one line
-nft_id = client.mint_nft(
-    name="My First NFT",
-    description="A unique digital asset",
-    image_url="https://example.com/image.png"
-)
+# Token decimals are automatically fetched from the node
+# Supports fractional amounts based on token's actual decimal places
+tx_id = client.distribute_tokens("distribution_with_decimals.yaml")
 ```
 
-## 📚 Tutorials
+**Decimal Handling Features:**
+- ✅ Fetches token info from node automatically
+- ✅ Validates fractional amounts against token decimal places
+- ✅ Converts between display amounts and smallest units
+- ✅ Enhanced logging showing both display and smallest unit amounts
+- ✅ Graceful fallback when token info unavailable
 
-### 1. Basic Wallet Tutorial
-Learn fundamental wallet operations:
-
-```python
-from sigmapy.tutorials import BasicWalletTutorial
-
-tutorial = BasicWalletTutorial()
-tutorial.run_complete_tutorial()
-```
-
-**Covers:**
-- Creating new wallets
-- Restoring from mnemonic
-- Generating addresses
-- Checking balances
-
-### 2. Transaction Tutorial
-Master transaction creation and management:
-
-```python
-from sigmapy.tutorials import TransactionTutorial
-
-tutorial = TransactionTutorial()
-tutorial.run_complete_tutorial()
-```
-
-**Covers:**
-- Building transactions
-- Signing and verification
-- Fee calculation
-- Broadcasting to network
-
-### 3. Token Tutorial
-Work with Ergo's native tokens:
-
-```python
-from sigmapy.tutorials import TokenTutorial
-
-tutorial = TokenTutorial()
-tutorial.run_complete_tutorial()
-```
-
-**Covers:**
-- Token creation and minting
-- Token transfers
-- NFT operations
-- Token metadata
-
-## 🚀 High-Level APIs
-
-SigmaPy provides beginner-friendly, high-level APIs that make complex operations simple:
+## 🛠️ High-Level Python API
 
 ### ErgoClient - Your Main Interface
 
 ```python
 from sigmapy import ErgoClient
 
-# Initialize with seed phrase
-client = ErgoClient(seed_phrase="your seed phrase here")
-
-# Or with custom node
+# Initialize with environment variables or explicit parameters
 client = ErgoClient(
     seed_phrase="your seed phrase here",
     node_url="http://localhost:9053",
-    network="testnet"
+    network="mainnet",
+    dry_run=True  # Test mode
 )
+
+# Validate configuration before execution
+result = client.validate_distribution_config("distribution.yaml")
+print(f"Valid: {result['valid']}")
+print(f"Total cost: {result['total_erg_needed']} ERG")
+
+# Execute distribution (single transaction for all recipients)
+tx_id = client.distribute_tokens("distribution.yaml")
+print(f"Distribution completed: {tx_id}")
 ```
 
-### NFT Operations
+### Configuration Validation
 
 ```python
-# Mint a single NFT
-nft_id = client.mint_nft(
-    name="My Artwork",
-    description="A unique piece of digital art",
-    image_url="https://example.com/art.png",
-    traits={"rarity": "legendary", "color": "gold"}
-)
+# Comprehensive validation with detailed feedback
+result = client.validate_distribution_config("my_distribution.yaml")
 
-# Mint entire collection from config
-nft_ids = client.mint_nft_collection("collection_config.yaml")
+if result['valid']:
+    print(f"✅ Ready to distribute to {result['total_recipients']} recipients")
+    print(f"💰 Total cost: {result['total_erg_needed']} ERG")
+else:
+    for error in result['errors']:
+        print(f"❌ {error}")
 ```
 
-### Token Operations
+## 📁 CLI Tools
 
-```python
-# Create a token
-token_id = client.create_token(
-    name="My Token",
-    description="A utility token",
-    supply=1000000,
-    decimals=2
-)
+### Token Distribution CLI
 
-# Distribute to multiple addresses
-tx_ids = client.distribute_tokens(
-    token_id="abc123...",
-    config_file="distribution.yaml"
-)
+Complete command-line interface for token operations:
 
-# Airdrop to addresses
-tx_ids = client.airdrop_tokens(
-    token_id="abc123...",
-    addresses=["9f...", "9g...", "9h..."],
-    amounts=[100, 200, 300]
-)
+```bash
+# Validate configuration
+python examples/cli_token_distribution.py validate config.yaml
+
+# Test with dry-run (shows transaction details without broadcasting)
+python examples/cli_token_distribution.py distribute config.yaml --dry-run
+
+# Execute live transactions (requires confirmation)
+python examples/cli_token_distribution.py distribute config.yaml --live
+
+# Create template configuration
+python examples/cli_token_distribution.py template new_config.yaml
+
+# All recipients processed in single transaction
+# Token decimals automatically fetched from node
+# Use --dry-run to validate before executing live transactions
 ```
 
-### Configuration-Driven Operations
+## 🏗️ Architecture
 
-Create YAML config files for batch operations:
+### Core Components
 
-```yaml
-# nft_collection.yaml
-collection:
-  name: "My Art Collection"
-  description: "Digital artwork collection"
-  
-nfts:
-  - name: "Art #1"
-    description: "First artwork"
-    image: "https://example.com/art1.png"
-    traits:
-      background: "blue"
-      rarity: "common"
-  # ... more NFTs
-```
+- **ErgoClient**: High-level API for all blockchain operations
+- **WalletManager**: Real ergo-lib-python integration for wallet operations
+- **NetworkManager**: Mainnet/testnet node connectivity with fallback support
+- **TokenManager**: Production token distribution with decimal support
 
-```yaml
-# token_distribution.yaml
-distribution:
-  batch_size: 50
-  fee_per_tx: 0.001
-  
-recipients:
-  - address: "9f..."
-    amount: 100
-  - address: "9g..."
-    amount: 200
-  # ... more recipients
-```
-
-## 🔧 Examples
-
-### Simple Payment
-Send ERG from one address to another:
-
-```python
-from sigmapy.examples import SimplePaymentExample
-
-example = SimplePaymentExample()
-example.create_payment_transaction(
-    sender_address="9f...",
-    recipient_address="9g...",
-    amount_erg=1.5
-)
-```
-
-### Token Operations
-Create and transfer tokens:
-
-```python
-from sigmapy.examples import TokenOperationsExample
-
-example = TokenOperationsExample()
-example.create_token(
-    name="MyToken",
-    description="My first Ergo token",
-    amount=1000000
-)
-```
-
-### Multi-signature Wallet
-Collaborative spending with multiple parties:
-
-```python
-from sigmapy.examples import MultiSigExample
-
-example = MultiSigExample()
-example.create_multisig_wallet(
-    required_signatures=2,
-    public_keys=["pk1", "pk2", "pk3"]
-)
-```
-
-## 🛠️ Utilities
-
-SigmaPy includes helpful utilities for common operations:
-
-```python
-from sigmapy.utils import AmountUtils, AddressUtils
-
-# Convert between ERG and nanoERG
-nanoerg = AmountUtils.erg_to_nanoerg(1.5)
-erg = AmountUtils.nanoerg_to_erg(1500000000)
-
-# Validate addresses
-is_valid = AddressUtils.validate_address("9f...")
-network = AddressUtils.get_network_type("9f...")
-```
-
-## 📁 Project Structure
+### File Structure
 
 ```
 sigmapy/
 ├── src/sigmapy/
-│   ├── tutorials/          # Step-by-step learning modules
-│   │   ├── basic_wallet.py
-│   │   ├── transactions.py
-│   │   ├── tokens.py
-│   │   └── addresses.py
-│   ├── examples/           # Practical code examples
-│   │   ├── simple_payment.py
-│   │   ├── token_operations.py
-│   │   ├── nft_examples.py
-│   │   └── multisig_example.py
-│   └── utils/              # Helper functions and utilities
-│       ├── amount_utils.py
-│       ├── address_utils.py
-│       ├── transaction_utils.py
-│       └── network_utils.py
-├── tests/                  # Test suite
-├── docs/                   # Documentation
-└── examples/               # Standalone example scripts
+│   ├── client/
+│   │   ├── ergo_client.py      # Main API
+│   │   ├── wallet_manager.py   # Wallet operations
+│   │   └── network_manager.py  # Network connectivity
+│   ├── operations/
+│   │   └── token_manager.py    # Token distribution system
+│   └── utils/                  # Helper utilities
+├── examples/
+│   ├── cli_token_distribution.py      # Production CLI tool
+│   ├── test_large_distribution.yaml   # 60-recipient example
+│   └── test_decimal_distribution.yaml # Decimal handling example
+└── CLAUDE.md                   # Development guide
 ```
 
-## 🔗 Dependencies
+## 🔄 Production Use Cases
 
-- **ergo-lib-python** - Official Ergo Python bindings
-- **requests** - HTTP client for node communication
-- **typing-extensions** - Enhanced type hints
+### 1. Recurring Airdrops
 
-## 📖 Learning Path
+Perfect for projects that need to distribute tokens regularly:
 
-### For Complete Beginners
+```yaml
+# Weekly airdrop to 50+ community members
+distribution:
+  token_id: "your_token_id"
+  fee_per_tx: 0.001
 
-1. **Start with the Demo** - Run `python examples/beginner_friendly_demo.py`
-2. **Follow Installation Guide** - See [INSTALLATION.md](INSTALLATION.md) for full setup
-3. **Try High-Level APIs** - Use `ErgoClient` for simple operations
-4. **Explore Config Files** - Use YAML files for batch operations
+recipients:
+  # 50+ recipients with varying amounts
+  - address: "9f..." 
+    amount: 100.25
+  # ... more recipients
+```
 
-### For Developers
+### 2. Token Launch Distribution
 
-1. **Basic Wallet Tutorial** - Learn wallet fundamentals
-2. **Simple Payment Example** - Send your first transaction
-3. **Advanced Transactions** - Multi-output with registers and extensions
-4. **Token Operations** - Create and distribute tokens
-5. **NFT Collections** - Mint entire collections from config files
-6. **Build Your Own** - Use utilities to create custom applications
+Handle initial token distribution efficiently:
 
-### Example Commands
+- Single transaction for all recipients
+- Automatic decimal handling
+- Comprehensive validation
+- Dry-run testing before launch
+
+### 3. Community Rewards
+
+Distribute rewards based on contribution:
+
+```python
+# Load recipients from database/API
+recipients = get_contributors_from_api()
+
+# Generate config dynamically
+config = create_distribution_config(token_id, recipients)
+
+# Validate and execute
+if client.validate_distribution_config(config)['valid']:
+    tx_id = client.distribute_tokens(config)
+```
+
+## ⚙️ Environment Configuration
 
 ```bash
-# Run the beginner demo
-python examples/beginner_friendly_demo.py
-
-# Run advanced transaction example
-python examples/advanced_transaction.py
-
-# Try the basic wallet tutorial
-python -c "from sigmapy.tutorials import BasicWalletTutorial; BasicWalletTutorial().run_complete_tutorial()"
+# .env file
+ERGO_SEED_PHRASE="your twelve word mnemonic phrase here"
+ERGO_NODE_URL="http://127.0.0.1:9053"
+ERGO_NETWORK="mainnet"
+ERGO_API_KEY="optional_api_key"
 ```
+
+## 🧪 Testing & Validation
+
+### Dry-Run Mode
+
+Always test before executing live transactions:
+
+```python
+# Test mode - builds transactions but doesn't broadcast
+client = ErgoClient(dry_run=True)
+result = client.distribute_tokens("config.yaml")
+print(f"Dry run result: {result}")
+```
+
+### Comprehensive Validation
+
+- ✅ Address format validation
+- ✅ Token amount validation against decimals
+- ✅ Balance checking
+- ✅ Fee calculation
+- ✅ Transaction size limits
+
+## 🔒 Security Best Practices
+
+- **Never commit seed phrases** - Use environment variables
+- **Always use dry-run first** - Test transactions before broadcasting
+- **Validate all inputs** - Address formats, amounts, token IDs
+- **Monitor wallet balances** - Ensure sufficient funds
+- **Use mainnet carefully** - Test on testnet first
+
+## 🛣️ Roadmap
+
+### Phase 1: ✅ Complete - Token Distribution
+- Single transaction processing for 60+ recipients
+- Node-agnostic decimal support
+- CLI tools and validation
+- Production-ready error handling
+
+### Phase 2: NFT Operations (Planned)
+- NFT minting and batch operations
+- Collection management
+- Metadata handling
+
+### Phase 3: API Backend (Planned)
+- REST API for token operations
+- Webhook support
+- Database integration
+
+### Phase 4: Storage Rent & Automation (Planned)
+- Storage rent collection bots
+- Automated UTXO management
+- Recurring payment systems
+
+### Phase 5: External Integrations (Planned)
+- Nautilus wallet integration
+- Rosen bridge support
+- DEX integration
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! The project follows a modular architecture that makes it easy to add new features.
 
 ### Development Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/ergoplatform/sigmapy.git
 cd sigmapy
-
-# Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install in development mode
+source venv/bin/activate
 pip install -e .[dev]
-
-# Run tests
 pytest tests/
 ```
 
@@ -354,15 +336,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 - **Issues**: [GitHub Issues](https://github.com/ergoplatform/sigmapy/issues)
-- **Documentation**: [SigmaPy Docs](https://sigmapy.readthedocs.io)
 - **Community**: [Ergo Discord](https://discord.gg/ergo)
+- **Documentation**: See CLAUDE.md for development guidance
 
-## 🌟 Acknowledgments
+## 🌟 Success Stories
 
-- Built on top of [ergo-lib-python](https://github.com/ergoplatform/sigma-rust/tree/develop/bindings/ergo-lib-python)
-- Inspired by the Ergo community's commitment to education
-- Special thanks to all contributors and beta testers
+**Token Distribution Achievements:**
+- ✅ 60 recipients in single transaction
+- ✅ 0.061 ERG total cost (minimal fees)
+- ✅ Automatic decimal handling for any token
+- ✅ Production-ready validation and error handling
+- ✅ CLI tools for easy operation
 
 ---
 
-**Ready to start building on Ergo? Begin with the [Basic Wallet Tutorial](src/sigmapy/tutorials/basic_wallet.py)!**
+**Ready to distribute tokens at scale? Start with the [CLI tool](examples/cli_token_distribution.py)!**

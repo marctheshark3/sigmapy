@@ -1,0 +1,12 @@
+collection:
+  additional_metadata:
+    twitter: '@artcollection'
+    website: https://example.com
+  description: A unique digital art collection
+  name: My Art Collection
+  royalties:
+  - address: 9fArtistAddressHere...
+    percentage: 85
+  - address: 9fCharityAddressHere...
+    percentage: 15
+  supply: 10000

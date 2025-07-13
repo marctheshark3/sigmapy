@@ -2,20 +2,28 @@
 High-level operation interfaces for common Ergo blockchain tasks
 
 This module provides simplified interfaces for:
-- NFT minting and management
+- NFT minting and management with EIP-24 compliance
 - Token creation and distribution
-- Smart contract deployment and interaction
-- Batch processing operations
+- Collection token management
+- Complex multi-recipient royalty structures
+- Smart contract deployment and interaction (TODO)
+- Batch processing operations (TODO)
 """
 
-from .nft_minter import NFTMinter
 from .token_manager import TokenManager
-from .contract_manager import ContractManager
-from .batch_processor import BatchProcessor
+from .collection_manager import CollectionManager
+from .nft_minter import NFTMinter
+from .royalty_manager import RoyaltyManager
+
+# TODO: Implement these
+# from .contract_manager import ContractManager
+# from .batch_processor import BatchProcessor
 
 __all__ = [
-    "NFTMinter",
     "TokenManager",
-    "ContractManager",
-    "BatchProcessor",
+    "CollectionManager",
+    "NFTMinter", 
+    "RoyaltyManager",
+    # "ContractManager", # TODO
+    # "BatchProcessor",  # TODO
 ]

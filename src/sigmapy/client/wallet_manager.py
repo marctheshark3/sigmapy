@@ -9,11 +9,18 @@ This class handles wallet-related operations including:
 - UTXO management
 """
 
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 import logging
 from decimal import Decimal
 
 from ..utils import AmountUtils
+
+try:
+    import ergo_lib_python as ergo
+    ERGO_LIB_AVAILABLE = True
+except ImportError:
+    ERGO_LIB_AVAILABLE = False
+    ergo = None
 
 
 class WalletManager:
@@ -22,38 +29,38 @@ class WalletManager:
     different wallet connection methods (seed phrase, node, future Nautilus).
     """
     
-    def __init__(self, seed_phrase: Optional[str] = None):
+    def __init__(self, seed_phrase: Optional[str] = None, network: str = "mainnet"):
         """
         Initialize the WalletManager.
         
         Args:
             seed_phrase: Wallet seed phrase for signing transactions
+            network: Network type ("mainnet" or "testnet")
         """
         self.logger = logging.getLogger(__name__)
         self.seed_phrase = seed_phrase
+        self.network = network
         self.addresses = []
         self.cached_balances = {}
+        self.secret_key = None
+        self.wallet = None
+        
+        # Set network type
+        if ERGO_LIB_AVAILABLE and ergo:
+            self.network_type = ergo.NetworkType.Mainnet if network == "mainnet" else ergo.NetworkType.Testnet
+        else:
+            self.network_type = None
+            self.logger.warning("ergo-lib-python not installed - using demo mode")
         
         # Initialize wallet connection
         if seed_phrase:
             self._initialize_wallet_from_seed(seed_phrase)
-        
-        # Try to initialize ergo-lib-python
-        try:
-            # import ergo_lib_python as ergo
-            # self.ergo = ergo
-            # self.wallet = self._create_wallet()
-            pass
-        except ImportError:
-            self.logger.warning("ergo-lib-python not installed")
-            self.ergo = None
-            self.wallet = None
     
     def _initialize_wallet_from_seed(self, seed_phrase: str) -> None:
         """Initialize wallet from seed phrase."""
         self.logger.info("Initializing wallet from seed phrase")
         
-        if not self.ergo:
+        if not ERGO_LIB_AVAILABLE:
             self.logger.warning("ergo-lib-python not available. Using demo mode.")
             # Demo addresses for testing
             self.addresses = [
@@ -63,9 +70,32 @@ class WalletManager:
             ]
             return
         
-        # Actual implementation:
-        # self.wallet = self.ergo.Wallet.restore(seed_phrase)
-        # self.addresses = self.wallet.get_addresses()
+        try:
+            # Convert seed phrase to secret key
+            mnemonic = ergo.Mnemonic.from_phrase(seed_phrase)
+            seed = mnemonic.to_seed("")
+            self.secret_key = ergo.SecretKey.derive_master(seed)
+            
+            # Generate first address
+            address = self._derive_address(0)
+            self.addresses = [str(address)]
+            
+            self.logger.info(f"Wallet initialized successfully for network: {self.network}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize wallet: {e}")
+            raise ValueError(f"Invalid seed phrase or initialization error: {e}")
+    
+    def _derive_address(self, index: int) -> str:
+        """Derive address at given index."""
+        if not ERGO_LIB_AVAILABLE or not self.secret_key:
+            return f"9demo_address_{index}"
+        
+        # Derive child key for the given index
+        child_key = self.secret_key.derive_child(index)
+        public_key = child_key.get_public_key()
+        address = ergo.Address.p2pk(public_key, self.network_type)
+        return str(address)
     
     def has_wallet(self) -> bool:
         """Check if wallet is initialized."""
@@ -86,14 +116,9 @@ class WalletManager:
         
         # Generate additional addresses if needed
         while len(self.addresses) < count:
-            if not self.ergo:
-                # Demo mode - generate placeholder addresses
-                self.addresses.append(f"9demo_address_{len(self.addresses)}")
-            else:
-                # Actual implementation:
-                # new_address = self.wallet.get_new_address()
-                # self.addresses.append(new_address)
-                pass
+            index = len(self.addresses)
+            new_address = self._derive_address(index)
+            self.addresses.append(new_address)
         
         return self.addresses[:count]
     
@@ -115,7 +140,7 @@ class WalletManager:
         if address is None:
             address = self.get_primary_address()
         
-        if not self.ergo:
+        if not ERGO_LIB_AVAILABLE:
             # Demo mode - return simulated balance
             return {
                 "address": address,
@@ -128,20 +153,15 @@ class WalletManager:
                 "utxos": 5
             }
         
-        # Actual implementation:
-        # balance = self.wallet.get_balance(address)
-        # tokens = self.wallet.get_tokens(address)
-        # utxos = self.wallet.get_utxos(address)
-        # 
-        # return {
-        #     "address": address,
-        #     "erg": float(AmountUtils.nanoerg_to_erg(balance)),
-        #     "nanoerg": balance,
-        #     "tokens": tokens,
-        #     "utxos": len(utxos)
-        # }
-        
-        return {}
+        # This would be implemented with actual node calls in NetworkManager
+        # For now, return empty balance as NetworkManager will handle actual queries
+        return {
+            "address": address,
+            "erg": 0.0,
+            "nanoerg": 0,
+            "tokens": [],
+            "utxos": 0
+        }
     
     def get_utxos(self, address: Optional[str] = None) -> List[Dict[str, Any]]:
         """
@@ -156,7 +176,7 @@ class WalletManager:
         if address is None:
             address = self.get_primary_address()
         
-        if not self.ergo:
+        if not ERGO_LIB_AVAILABLE:
             # Demo mode - return simulated UTXOs
             return [
                 {
@@ -173,104 +193,15 @@ class WalletManager:
                 }
             ]
         
-        # Actual implementation:
-        # utxos = self.wallet.get_utxos(address)
-        # return [self._format_utxo(utxo) for utxo in utxos]
-        
+        # This would be implemented with actual node calls in NetworkManager
         return []
     
-    def send_erg(
-        self,
-        recipient: str,
-        amount_erg: float,
-        fee_erg: float = 0.001,
-        sender_address: Optional[str] = None
-    ) -> str:
-        """
-        Send ERG to an address.
-        
-        Args:
-            recipient: Recipient address
-            amount_erg: Amount to send in ERG
-            fee_erg: Transaction fee in ERG
-            sender_address: Sender address (uses primary if None)
-            
-        Returns:
-            Transaction ID
-        """
-        if sender_address is None:
-            sender_address = self.get_primary_address()
-        
-        amount_nanoerg = AmountUtils.erg_to_nanoerg(amount_erg)
-        fee_nanoerg = AmountUtils.erg_to_nanoerg(fee_erg)
-        
-        self.logger.info(f"Sending {amount_erg} ERG to {recipient}")
-        
-        if not self.ergo:
-            # Demo mode - return simulated transaction ID
-            return f"demo_tx_{hash(f'{recipient}{amount_erg}')}"
-        
-        # Actual implementation:
-        # tx = self.wallet.send_erg(
-        #     recipient=recipient,
-        #     amount=amount_nanoerg,
-        #     fee=fee_nanoerg,
-        #     sender=sender_address
-        # )
-        # return tx.id()
-        
-        return ""
-    
-    def send_tokens(
-        self,
-        token_id: str,
-        recipient: str,
-        amount: int,
-        fee_erg: float = 0.001,
-        sender_address: Optional[str] = None
-    ) -> str:
-        """
-        Send tokens to an address.
-        
-        Args:
-            token_id: Token ID to send
-            recipient: Recipient address
-            amount: Amount of tokens to send
-            fee_erg: Transaction fee in ERG
-            sender_address: Sender address (uses primary if None)
-            
-        Returns:
-            Transaction ID
-        """
-        if sender_address is None:
-            sender_address = self.get_primary_address()
-        
-        fee_nanoerg = AmountUtils.erg_to_nanoerg(fee_erg)
-        
-        self.logger.info(f"Sending {amount} tokens ({token_id}) to {recipient}")
-        
-        if not self.ergo:
-            # Demo mode - return simulated transaction ID
-            return f"demo_token_tx_{hash(f'{token_id}{recipient}{amount}')}"
-        
-        # Actual implementation:
-        # tx = self.wallet.send_tokens(
-        #     token_id=token_id,
-        #     recipient=recipient,
-        #     amount=amount,
-        #     fee=fee_nanoerg,
-        #     sender=sender_address
-        # )
-        # return tx.id()
-        
-        return ""
-    
-    def sign_transaction(self, transaction: Any) -> Any:
+    def sign_transaction(self, unsigned_tx: Any) -> Any:
         """
         Sign a transaction.
         
         Args:
-            transaction: Transaction to sign
+            unsigned_tx: Unsigned transaction to sign
             
         Returns:
             Signed transaction
@@ -278,73 +209,36 @@ class WalletManager:
         if not self.has_wallet():
             raise ValueError("No wallet available for signing")
         
-        if not self.ergo:
+        if not ERGO_LIB_AVAILABLE:
             self.logger.warning("ergo-lib-python not available. Cannot sign transaction.")
-            return transaction
+            return unsigned_tx
         
-        # Actual implementation:
-        # return self.wallet.sign_transaction(transaction)
+        if not self.secret_key:
+            raise ValueError("No secret key available for signing")
         
-        return transaction
-    
-    def create_transaction(
-        self,
-        outputs: List[Dict[str, Any]],
-        fee_erg: float = 0.001,
-        sender_address: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Create a transaction with multiple outputs.
-        
-        Args:
-            outputs: List of output specifications
-            fee_erg: Transaction fee in ERG
-            sender_address: Sender address (uses primary if None)
+        try:
+            # Create wallet from secret key
+            wallet = ergo.Wallet.from_secrets([self.secret_key])
             
-        Returns:
-            Transaction dictionary
+            # Sign the transaction
+            signed_tx = wallet.sign_transaction(unsigned_tx)
+            return signed_tx
+            
+        except Exception as e:
+            self.logger.error(f"Failed to sign transaction: {e}")
+            raise ValueError(f"Transaction signing failed: {e}")
+    
+    def create_transaction_builder(self) -> Any:
         """
-        if sender_address is None:
-            sender_address = self.get_primary_address()
+        Create a transaction builder instance.
         
-        fee_nanoerg = AmountUtils.erg_to_nanoerg(fee_erg)
+        Returns:
+            Transaction builder instance
+        """
+        if not ERGO_LIB_AVAILABLE:
+            raise NotImplementedError("Transaction builder not available in demo mode")
         
-        self.logger.info(f"Creating transaction with {len(outputs)} outputs")
-        
-        if not self.ergo:
-            # Demo mode - return simulated transaction
-            return {
-                "inputs": [{"box_id": "demo_input_1", "value": 10000000000}],
-                "outputs": outputs,
-                "fee": fee_nanoerg,
-                "sender": sender_address
-            }
-        
-        # Actual implementation:
-        # utxos = self.get_utxos(sender_address)
-        # tx_builder = self.ergo.TransactionBuilder()
-        # 
-        # # Add inputs
-        # total_input = 0
-        # for utxo in utxos:
-        #     tx_builder.add_input(utxo)
-        #     total_input += utxo["value"]
-        #     if total_input >= sum(o["value"] for o in outputs) + fee_nanoerg:
-        #         break
-        # 
-        # # Add outputs
-        # for output in outputs:
-        #     tx_builder.add_output(output)
-        # 
-        # # Add change if needed
-        # total_output = sum(o["value"] for o in outputs) + fee_nanoerg
-        # if total_input > total_output:
-        #     change = total_input - total_output
-        #     tx_builder.add_change_output(sender_address, change)
-        # 
-        # return tx_builder.build()
-        
-        return {}
+        return ergo.TxBuilder()
     
     def validate_seed_phrase(self, seed_phrase: str) -> bool:
         """
@@ -364,66 +258,60 @@ class WalletManager:
         if len(words) not in [12, 15, 18, 21, 24]:
             return False
         
-        if not self.ergo:
+        if not ERGO_LIB_AVAILABLE:
             # Demo mode - basic validation
             return len(words) >= 12
         
-        # Actual implementation:
-        # try:
-        #     self.ergo.Wallet.restore(seed_phrase)
-        #     return True
-        # except:
-        #     return False
-        
-        return True
+        try:
+            # Try to create mnemonic from phrase
+            mnemonic = ergo.Mnemonic.from_phrase(seed_phrase)
+            return True
+        except:
+            return False
     
-    def export_private_key(self, address: str) -> str:
+    def validate_address(self, address: str) -> bool:
         """
-        Export private key for an address.
+        Validate an Ergo address.
         
         Args:
-            address: Address to export private key for
+            address: Address to validate
             
         Returns:
-            Private key as hex string
-            
-        Warning:
-            This is a sensitive operation. Handle private keys securely.
+            True if valid, False otherwise
         """
-        if not self.has_wallet():
-            raise ValueError("No wallet available")
+        if not address:
+            return False
         
-        if not self.ergo:
-            raise NotImplementedError("Private key export not available in demo mode")
+        if not ERGO_LIB_AVAILABLE:
+            # Demo mode - basic validation
+            return address.startswith("9") and len(address) > 30
         
-        # Actual implementation:
-        # return self.wallet.export_private_key(address)
-        
-        return ""
+        try:
+            # Try to parse address
+            ergo.Address.from_base58(address)
+            return True
+        except:
+            return False
     
-    def _format_utxo(self, utxo: Any) -> Dict[str, Any]:
-        """Format a UTXO for consistent output."""
-        # This would format the UTXO from ergo-lib-python
-        # into a consistent dictionary format
-        return {
-            "box_id": str(utxo.box_id()),
-            "value": utxo.value(),
-            "address": str(utxo.address()),
-            "tokens": [
-                {"id": str(token.id()), "amount": token.amount()}
-                for token in utxo.tokens()
-            ]
-        }
+    def get_network_type(self) -> str:
+        """Get the current network type."""
+        return self.network
+    
+    def is_demo_mode(self) -> bool:
+        """Check if running in demo mode."""
+        return not ERGO_LIB_AVAILABLE
     
     def __str__(self) -> str:
         """String representation of the wallet manager."""
-        return f"WalletManager(has_wallet={self.has_wallet()})"
+        return f"WalletManager(has_wallet={self.has_wallet()}, network={self.network})"
     
     def __repr__(self) -> str:
         """Detailed string representation."""
         return (
             f"WalletManager("
             f"has_wallet={self.has_wallet()}, "
-            f"addresses={len(self.addresses)}"
+            f"network={self.network}, "
+            f"addresses={len(self.addresses)}, "
+            f"demo_mode={self.is_demo_mode()}"
             f")"
         )

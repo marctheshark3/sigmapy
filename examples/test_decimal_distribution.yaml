@@ -1,0 +1,29 @@
+# Token Distribution with Decimal Support Test
+# Testing fractional token amounts
+# Single transaction for all recipients
+
+distribution:
+  token_id: "1fd6e032e8476c4aa54c18c1a308dce83940e8f4a28f576440513ed7326ad489"  # Example token ID
+  fee_per_tx: 0.001  # Fee in ERG per transaction
+
+recipients:
+  # Testing fractional amounts (decimals fetched from node)
+  - address: "9fRusAarL1KkrWQVsxSRVYnvWzD4dWoLLxbYk3eWBV3jD3qvr3W"
+    amount: 10.50
+    note: "Fractional amount test"
+    
+  - address: "9gQqZyxyjAptMbfW1Gydm3qaap11zd6X9DrABTbMBRJLjZhQRCA"
+    amount: 25.75
+    note: "Another fractional amount"
+    
+  - address: "9h8UVJjdUYbNLuSqzZCqKNs2mxjVGYB9JwP4vVtNqmR3sKdxYyZ"
+    amount: 100.00
+    note: "Whole number amount"
+    
+  - address: "9iTest1234567890123456789012345678901234567890"
+    amount: 0.01
+    note: "Small fractional amount"
+    
+  - address: "9jTest1234567890123456789012345678901234567890"
+    amount: 5.99
+    note: "Complex fractional amount"

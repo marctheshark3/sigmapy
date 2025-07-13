@@ -10,8 +10,11 @@ from typing import Dict, List, Optional, Union, Any
 import logging
 from pathlib import Path
 
-from ..operations import NFTMinter, TokenManager, ContractManager, BatchProcessor
-from ..utils import AmountUtils, SerializationUtils, EnvManager
+from ..operations import TokenManager
+from ..operations.collection_manager import CollectionManager
+from ..operations.nft_minter import NFTMinter
+from ..operations.royalty_manager import RoyaltyManager
+from ..utils import AmountUtils, EnvManager
 from .wallet_manager import WalletManager
 from .network_manager import NetworkManager
 
@@ -51,7 +54,8 @@ class ErgoClient:
         node_url: Optional[str] = None,
         network: Optional[str] = None,
         api_key: Optional[str] = None,
-        env_file: Optional[str] = None
+        env_file: Optional[str] = None,
+        dry_run: bool = False
     ):
         """
         Initialize the ErgoClient.
@@ -62,6 +66,7 @@ class ErgoClient:
             network: Network to use ("mainnet" or "testnet") (overrides env)
             api_key: API key for node access (overrides env)
             env_file: Path to .env file (defaults to .env in current directory)
+            dry_run: If True, build transactions but don't broadcast them
             
         Examples:
             >>> # Initialize with environment variables
@@ -85,6 +90,9 @@ class ErgoClient:
         # Get configuration from environment or parameters
         config = self._get_config(seed_phrase, node_url, network, api_key)
         
+        # Set dry run mode
+        self.dry_run = dry_run or config.get("demo_mode", False)
+        
         # Validate security
         security = self.env_manager.validate_security()
         if not security["secure"]:
@@ -97,7 +105,7 @@ class ErgoClient:
             self.logger.warning(f"Security warning: {warning}")
         
         # Initialize managers
-        self.wallet_manager = WalletManager(config["seed_phrase"])
+        self.wallet_manager = WalletManager(config["seed_phrase"], config["network"])
         self.network_manager = NetworkManager(
             config["node_url"], 
             config["network"], 
@@ -105,11 +113,14 @@ class ErgoClient:
             config["timeout"]
         )
         
-        # Initialize operation handlers
-        self.nft_minter = NFTMinter(self.wallet_manager, self.network_manager)
-        self.token_manager = TokenManager(self.wallet_manager, self.network_manager)
-        self.contract_manager = ContractManager(self.wallet_manager, self.network_manager)
-        self.batch_processor = BatchProcessor(self.wallet_manager, self.network_manager)
+        # Initialize operation handlers with dry-run mode
+        self.token_manager = TokenManager(self.wallet_manager, self.network_manager, self.dry_run)
+        self.collection_manager = CollectionManager(self.wallet_manager, self.network_manager, self.dry_run)
+        self.nft_minter = NFTMinter(self.wallet_manager, self.network_manager, self.dry_run)
+        self.royalty_manager = RoyaltyManager()
+        # TODO: Implement remaining managers
+        # self.contract_manager = ContractManager(self.wallet_manager, self.network_manager, self.dry_run)
+        # self.batch_processor = BatchProcessor(self.wallet_manager, self.network_manager, self.dry_run)
         
         self.logger.info(f"ErgoClient initialized for {config['network']}")
     
@@ -201,60 +212,8 @@ class ErgoClient:
         """
         return self.wallet_manager.send_erg(recipient, amount_erg, fee_erg)
     
-    # NFT Operations
-    def mint_nft(
-        self,
-        name: str,
-        description: str,
-        image_url: Optional[str] = None,
-        traits: Optional[Dict[str, Any]] = None,
-        recipient: Optional[str] = None
-    ) -> str:
-        """
-        Mint a single NFT.
-        
-        Args:
-            name: NFT name
-            description: NFT description
-            image_url: URL to NFT image
-            traits: Dictionary of NFT traits/attributes
-            recipient: Address to receive NFT (uses default if None)
-            
-        Returns:
-            NFT token ID
-            
-        Examples:
-            >>> nft_id = client.mint_nft(
-            ...     name="My First NFT",
-            ...     description="A unique digital asset",
-            ...     image_url="https://example.com/image.png",
-            ...     traits={"rarity": "rare", "color": "blue"}
-            ... )
-            >>> print(f"NFT minted: {nft_id}")
-        """
-        return self.nft_minter.mint_single_nft(
-            name=name,
-            description=description,
-            image_url=image_url,
-            traits=traits,
-            recipient=recipient
-        )
-    
-    def mint_nft_collection(self, config_file: Union[str, Path]) -> List[str]:
-        """
-        Mint a collection of NFTs from a configuration file.
-        
-        Args:
-            config_file: Path to YAML/JSON configuration file
-            
-        Returns:
-            List of NFT token IDs
-            
-        Examples:
-            >>> nft_ids = client.mint_nft_collection("my_collection.yaml")
-            >>> print(f"Minted {len(nft_ids)} NFTs")
-        """
-        return self.nft_minter.mint_collection(config_file)
+    # TODO: Implement NFT operations when NFTMinter is ready
+    # NFT operations temporarily disabled until NFTMinter is implemented
     
     # Token Operations
     def create_token(
@@ -324,29 +283,240 @@ class ErgoClient:
         """
         return self.token_manager.send_tokens(token_id, recipient, amount, fee_erg)
     
-    def distribute_tokens(
-        self,
-        token_id: str,
-        config_file: Union[str, Path]
-    ) -> List[str]:
+    def distribute_tokens(self, config_file: Union[str, Path]) -> str:
         """
         Distribute tokens to multiple addresses from a configuration file.
+        All recipients are processed in a single transaction.
         
         Args:
-            token_id: Token ID to distribute
-            config_file: Path to YAML/JSON configuration file
+            config_file: Path to YAML configuration file
             
         Returns:
-            List of transaction IDs
+            Transaction ID (single transaction for all recipients)
             
         Examples:
-            >>> tx_ids = client.distribute_tokens(
-            ...     token_id="abc123...",
-            ...     config_file="distribution.yaml"
-            ... )
-            >>> print(f"Distributed in {len(tx_ids)} transactions")
+            >>> tx_id = client.distribute_tokens("distribution.yaml")
+            >>> print(f"Distribution completed in transaction: {tx_id}")
         """
-        return self.token_manager.distribute_tokens(token_id, config_file)
+        return self.token_manager.distribute_tokens_from_config(config_file)
+    
+    def validate_distribution_config(self, config_file: Union[str, Path]) -> Dict[str, Any]:
+        """
+        Validate a token distribution configuration file.
+        
+        Args:
+            config_file: Path to YAML configuration file
+            
+        Returns:
+            Validation result with summary
+            
+        Examples:
+            >>> result = client.validate_distribution_config("distribution.yaml")
+            >>> if result["valid"]:
+            ...     print("Configuration is valid")
+            ... else:
+            ...     print(f"Errors: {result['errors']}")
+        """
+        return self.token_manager.validate_distribution_config(config_file)
+    
+    # Collection Operations
+    
+    def create_collection_token(
+        self,
+        name: str,
+        description: str,
+        supply: int,
+        royalties: Optional[List[Dict[str, Any]]] = None,
+        additional_metadata: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Create a collection token according to EIP-24 standard.
+        
+        Args:
+            name: Collection name
+            description: Collection description
+            supply: Total supply of collection tokens
+            royalties: List of royalty recipients with addresses and percentages
+            additional_metadata: Additional collection-level metadata
+            
+        Returns:
+            Transaction ID
+            
+        Examples:
+            >>> collection_id = client.create_collection_token(
+            ...     name="My Art Collection",
+            ...     description="Digital artwork series",
+            ...     supply=10000,
+            ...     royalties=[{"address": "9f...", "percentage": 5}]
+            ... )
+        """
+        return self.collection_manager.create_collection_token(
+            name, description, supply, royalties, additional_metadata
+        )
+    
+    def create_collection_from_config(self, config_file: Union[str, Path]) -> str:
+        """
+        Create a collection token from a YAML configuration file.
+        
+        Args:
+            config_file: Path to YAML configuration file
+            
+        Returns:
+            Transaction ID
+            
+        Examples:
+            >>> collection_id = client.create_collection_from_config("collection.yaml")
+        """
+        return self.collection_manager.create_collection_from_config(config_file)
+    
+    def validate_collection_config(self, config_file: Union[str, Path]) -> Dict[str, Any]:
+        """
+        Validate a collection configuration file.
+        
+        Args:
+            config_file: Path to YAML configuration file
+            
+        Returns:
+            Validation result with summary
+        """
+        return self.collection_manager.validate_collection_config(config_file)
+    
+    # NFT Operations
+    
+    def mint_nft(
+        self,
+        name: str,
+        description: str,
+        image_url: Optional[str] = None,
+        collection_token_id: Optional[str] = None,
+        royalties: Optional[List[Dict[str, Any]]] = None,
+        traits: Optional[Dict[str, Any]] = None,
+        additional_metadata: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Mint a single NFT with EIP-24 compliance.
+        
+        Args:
+            name: NFT name
+            description: NFT description
+            image_url: URL to NFT image/content
+            collection_token_id: Collection token ID (links to collection)
+            royalties: List of royalty recipients
+            traits: NFT traits (properties, levels, stats)
+            additional_metadata: Additional metadata
+            
+        Returns:
+            Transaction ID
+            
+        Examples:
+            >>> nft_id = client.mint_nft(
+            ...     name="Art #1",
+            ...     description="First artwork",
+            ...     image_url="https://example.com/art1.png",
+            ...     collection_token_id="abc123...",
+            ...     traits={
+            ...         "properties": {"background": "blue"},
+            ...         "levels": {"rarity": {"value": 85, "max": 100}}
+            ...     }
+            ... )
+        """
+        return self.nft_minter.mint_nft(
+            name, description, image_url, collection_token_id,
+            royalties, traits, additional_metadata
+        )
+    
+    def mint_nft_collection(self, collection_config: Union[str, Path, Dict[str, Any]]) -> List[str]:
+        """
+        Mint an entire NFT collection sequentially.
+        
+        Args:
+            collection_config: Path to YAML config file or config dict
+            
+        Returns:
+            List of transaction IDs (one per NFT)
+            
+        Examples:
+            >>> nft_ids = client.mint_nft_collection("nft_collection.yaml")
+            >>> print(f"Minted {len(nft_ids)} NFTs")
+        """
+        return self.nft_minter.mint_nft_collection(collection_config)
+    
+    def validate_nft_collection_config(self, config_file: Union[str, Path]) -> Dict[str, Any]:
+        """
+        Validate an NFT collection configuration file.
+        
+        Args:
+            config_file: Path to YAML configuration file
+            
+        Returns:
+            Validation result with summary
+        """
+        return self.nft_minter.validate_nft_collection_config(config_file)
+    
+    # Royalty Operations
+    
+    def create_royalty_structure(
+        self,
+        recipients: List[Dict[str, Any]],
+        validate: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Create a royalty structure with multiple recipients.
+        
+        Args:
+            recipients: List of royalty recipients with addresses and percentages
+            validate: Whether to validate the structure
+            
+        Returns:
+            EIP-24 compliant royalty structure
+            
+        Examples:
+            >>> royalties = client.create_royalty_structure([
+            ...     {"address": "9fArtist...", "percentage": 80, "name": "Artist"},
+            ...     {"address": "9fCharity...", "percentage": 15, "name": "Charity"},
+            ...     {"address": "9fPlatform...", "percentage": 5, "name": "Platform"}
+            ... ])
+        """
+        return self.royalty_manager.create_royalty_structure(recipients, validate)
+    
+    def calculate_royalty_distribution(
+        self,
+        royalty_structure: Dict[str, Any],
+        sale_amount_erg: float
+    ) -> Dict[str, Any]:
+        """
+        Calculate royalty distribution for a given sale amount.
+        
+        Args:
+            royalty_structure: Royalty structure
+            sale_amount_erg: Sale amount in ERG
+            
+        Returns:
+            Distribution breakdown with amounts for each recipient
+        """
+        return self.royalty_manager.calculate_royalty_distribution(royalty_structure, sale_amount_erg)
+    
+    def set_dry_run_mode(self, dry_run: bool):
+        """
+        Enable or disable dry-run mode.
+        
+        Args:
+            dry_run: If True, build transactions but don't broadcast them
+            
+        Examples:
+            >>> client.set_dry_run_mode(True)  # Enable dry-run
+            >>> tx_ids = client.distribute_tokens("distribution.yaml")  # Won't broadcast
+            >>> client.set_dry_run_mode(False)  # Disable dry-run
+        """
+        self.dry_run = dry_run
+        self.token_manager.set_dry_run_mode(dry_run)
+        self.collection_manager.set_dry_run_mode(dry_run)
+        self.nft_minter.set_dry_run_mode(dry_run)
+        self.logger.info(f"Dry-run mode {'enabled' if dry_run else 'disabled'}")
+    
+    def get_dry_run_mode(self) -> bool:
+        """Check if in dry-run mode."""
+        return self.dry_run
     
     def airdrop_tokens(
         self,
@@ -375,80 +545,8 @@ class ErgoClient:
         """
         return self.token_manager.airdrop_tokens(token_id, addresses, amounts)
     
-    # Smart Contract Operations
-    def deploy_contract(
-        self,
-        contract_code: str,
-        parameters: Optional[Dict[str, Any]] = None,
-        initial_funds_erg: float = 0.01
-    ) -> str:
-        """
-        Deploy a smart contract.
-        
-        Args:
-            contract_code: ErgoScript contract code
-            parameters: Contract parameters
-            initial_funds_erg: Initial ERG to fund the contract
-            
-        Returns:
-            Contract address
-            
-        Examples:
-            >>> contract_address = client.deploy_contract(
-            ...     contract_code="{ sigmaProp(true) }",
-            ...     initial_funds_erg=1.0
-            ... )
-            >>> print(f"Contract deployed: {contract_address}")
-        """
-        return self.contract_manager.deploy_contract(
-            contract_code, parameters, initial_funds_erg
-        )
-    
-    def interact_with_contract(
-        self,
-        contract_address: str,
-        method: str,
-        parameters: Optional[Dict[str, Any]] = None
-    ) -> str:
-        """
-        Interact with a deployed smart contract.
-        
-        Args:
-            contract_address: Address of the deployed contract
-            method: Method to call on the contract
-            parameters: Method parameters
-            
-        Returns:
-            Transaction ID
-            
-        Examples:
-            >>> tx_id = client.interact_with_contract(
-            ...     contract_address="9f...",
-            ...     method="withdraw",
-            ...     parameters={"amount": 1000}
-            ... )
-            >>> print(f"Contract interaction: {tx_id}")
-        """
-        return self.contract_manager.interact_with_contract(
-            contract_address, method, parameters
-        )
-    
-    # Batch Operations
-    def batch_operation(self, config_file: Union[str, Path]) -> Dict[str, Any]:
-        """
-        Execute a batch operation from a configuration file.
-        
-        Args:
-            config_file: Path to YAML/JSON configuration file
-            
-        Returns:
-            Dictionary containing operation results
-            
-        Examples:
-            >>> results = client.batch_operation("batch_config.yaml")
-            >>> print(f"Completed {results['successful']} operations")
-        """
-        return self.batch_processor.execute_batch(config_file)
+    # TODO: Implement smart contract and batch operations
+    # Smart contract and batch operations temporarily disabled
     
     # Utility Methods
     def get_network_info(self) -> Dict[str, Any]:
